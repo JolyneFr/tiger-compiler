@@ -8,7 +8,6 @@ docker-pull:
 
 docker-run:
 	docker run -it --privileged -p 2222:22 \
-
 		-v /home/jolynefr/codes/Compiler/compilers-2021:/home/stu/tiger-compiler ipadsse302/tigerlabs_env:latest
 
 docker-run-backend:

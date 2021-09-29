@@ -5,6 +5,7 @@
 #include <cstdarg>
 #include <iostream>
 #include <string>
+#include <stack>
 
 #include "scannerbase.h"
 #include "tiger/errormsg/errormsg.h"
@@ -50,6 +51,8 @@ private:
   std::string string_buf_;
   int char_pos_;
   std::unique_ptr<err::ErrorMsg> errormsg_;
+  std::stack<StartCondition__> d_scStack;
+  
 
   /**
    * NOTE: do not change all the funtion signature below, which is used by
@@ -63,6 +66,10 @@ private:
   void postCode(PostEnum__ type);
   void adjust();
   void adjustStr();
+
+  /* push and pop StartCondition */
+  void pushCond(StartCondition__ next);
+  void popCond();
 };
 
 inline int Scanner::lex() { return lex__(); }
@@ -83,5 +90,15 @@ inline void Scanner::adjust() {
 }
 
 inline void Scanner::adjustStr() { char_pos_ += length(); }
+
+inline void Scanner::pushCond(StartCondition__ next) {
+  d_scStack.push(startCondition()); // push the current SC.
+  begin(next);                      // switch to the next
+}
+
+inline void Scanner::popCond() {
+  begin(d_scStack.top());
+  d_scStack.pop();
+}
 
 #endif // TIGER_LEX_SCANNER_H_
