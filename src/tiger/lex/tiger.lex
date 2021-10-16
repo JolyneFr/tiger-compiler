@@ -136,17 +136,18 @@
 }
 
  /* comment */
-"/*" {adjust(); comment_level_++; pushCond(StartCondition__::COMMENT);}
+"/*" {adjust(); pushCond(StartCondition__::COMMENT);}
 
 <COMMENT> {
-  "/*" {adjustStr(); comment_level_++;}
-  "*/" {adjustStr(); comment_level_--; if (comment_level_ == 1) {popCond();}}
+  "/*" {adjustStr(); pushCond(StartCondition__::COMMENT);}
+  "*/" {adjustStr(); popCond();}
   .|\n {adjustStr();}
 }
 
   /* unclosed String or Comment*/
 <STR><<EOF>> {adjust(); errormsg_->Error(errormsg_->tok_pos_, "unclosed string");}
 <COMMENT><<EOF>> {adjust(); errormsg_->Error(errormsg_->tok_pos_, "unclosed comment");}
+<IGNORE><<EOF>> {adjust(); errormsg_->Error(errormsg_->tok_pos_, "unclosed ignore segment");}
 
  /*
   * skip white space chars.
