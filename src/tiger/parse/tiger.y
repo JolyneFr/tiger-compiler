@@ -48,7 +48,7 @@
 
 %type <exp> exp expseq
 %type <explist> actuals nonemptyactuals sequencing_exps
-%type <var> lvalue
+%type <var> lvalue one oneormore
 %type <declist> decs decs_nonempty
 %type <dec> decs_nonempty_s vardec
 %type <efieldlist> rec rec_nonempty
@@ -130,9 +130,18 @@ fundec_one:
 
 lvalue:  
   ID  {$$ = new absyn::SimpleVar(scanner_.GetTokPos(), $1);}
-  |  lvalue DOT ID  {$$ = new absyn::FieldVar(scanner_.GetTokPos(), $1, $3);}
+  |  oneormore  {$$ = $1;}
+  ;
+
+oneormore:
+  one  {$$ = $1;}
+  |  one DOT ID  {$$ = new absyn::FieldVar(scanner_.GetTokPos(), $1, $3);}
+  |  one LBRACK exp RBRACK  {$$ = new absyn::SubscriptVar(scanner_.GetTokPos(), $1, $3);}
+  ;
+
+one:
+  ID DOT ID  {$$ = new absyn::FieldVar(scanner_.GetTokPos(), new absyn::SimpleVar(scanner_.GetTokPos(), $1), $3);}
   |  ID LBRACK exp RBRACK  {$$ = new absyn::SubscriptVar(scanner_.GetTokPos(), new absyn::SimpleVar(scanner_.GetTokPos(), $1), $3);}
-  |  lvalue LBRACK exp RBRACK  {$$ = new absyn::SubscriptVar(scanner_.GetTokPos(), $1, $3);}
   ;
 
 exp:
