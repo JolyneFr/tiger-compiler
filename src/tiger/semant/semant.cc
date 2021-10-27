@@ -1,5 +1,11 @@
 #include "tiger/absyn/absyn.h"
 #include "tiger/semant/semant.h"
+#include <algorithm>
+#include <vector>
+
+bool existSymbol(std::vector<sym::Symbol*> vec, sym::Symbol* symbol) {
+  return std::find(vec.cbegin(), vec.cend(), symbol) != vec.cend();
+}
 
 namespace absyn {
 
@@ -169,7 +175,7 @@ type::Ty *RecordExp::SemAnalyze(env::VEnvPtr venv, env::TEnvPtr tenv,
     }
     /* exp type mismatch */
     type::Ty *eType = (*eFieldItr)->exp_->SemAnalyze(venv, tenv, labelcount, errormsg);
-    if (!eType || typeid(*eType) != typeid(*((*fieldItr)->ty_))) {
+    if (!eType || !eType->IsSameType((*fieldItr)->ty_)) {
       errormsg->Error(pos_, "field type mismatch");
       return type::IntTy::Instance();
     }
@@ -199,7 +205,7 @@ type::Ty *AssignExp::SemAnalyze(env::VEnvPtr venv, env::TEnvPtr tenv,
   /* TODO: Put your lab4 code here */
   type::Ty *varType = var_->SemAnalyze(venv, tenv, labelcount, errormsg);
   type::Ty *expType = exp_->SemAnalyze(venv, tenv, labelcount, errormsg);
-  if (!varType || !expType || typeid(*varType) != typeid(*expType)) {
+  if (!varType || !expType || !varType->IsSameType(expType)) {
     errormsg->Error(pos_, "unmatched assign exp");
     return type::IntTy::Instance();
   }
@@ -213,7 +219,7 @@ type::Ty *AssignExp::SemAnalyze(env::VEnvPtr venv, env::TEnvPtr tenv,
     }
   }
 
-  return varType->ActualTy();
+  return type::VoidTy::Instance();
 }
 
 type::Ty *IfExp::SemAnalyze(env::VEnvPtr venv, env::TEnvPtr tenv,
@@ -313,6 +319,9 @@ type::Ty *ArrayExp::SemAnalyze(env::VEnvPtr venv, env::TEnvPtr tenv,
     errormsg->Error(pos_, "undefined type %s", typ_->Name().c_str());
     return type::IntTy::Instance();
   }
+  while (typeid(*arrType) == typeid(type::NameTy)) {
+    arrType = static_cast<type::NameTy*>(arrType)->ty_;
+  }
   if (typeid(*arrType) != typeid(type::ArrayTy)) {
     errormsg->Error(pos_, "%s is not an array", typ_->Name().c_str());
     return type::IntTy::Instance();
@@ -326,7 +335,11 @@ type::Ty *ArrayExp::SemAnalyze(env::VEnvPtr venv, env::TEnvPtr tenv,
   }
 
   type::Ty *initType = init_->SemAnalyze(venv, tenv, labelcount, errormsg);
-  if (!initType || typeid(*(arrayType->ty_)) != typeid(*initType)) {
+  type::Ty *elemType = arrayType->ty_;
+  while (typeid(*elemType) == typeid(type::NameTy)) {
+    elemType = static_cast<type::NameTy*>(elemType)->ty_;
+  }
+  if (!initType || !elemType->IsSameType(initType)) {
     errormsg->Error(size_->pos_, "type mismatch");
     return type::IntTy::Instance();
   }
@@ -343,9 +356,10 @@ type::Ty *VoidExp::SemAnalyze(env::VEnvPtr venv, env::TEnvPtr tenv,
 void FunctionDec::SemAnalyze(env::VEnvPtr venv, env::TEnvPtr tenv,
                              int labelcount, err::ErrorMsg *errormsg) const {
   /* TODO: Put your lab4 code here */
+  std::vector<sym::Symbol*> scopeFuncs;
   /* first round: only scan declaration */
   for (const FunDec* funDec : functions_->GetList()) {
-    if (venv->Look(funDec->name_)) {
+    if (existSymbol(scopeFuncs, funDec->name_)) {
       errormsg->Error(pos_, "two functions have the same name");
     }
     type::TyList *formalList = funDec->params_->MakeFormalTyList(tenv, errormsg);
@@ -353,6 +367,7 @@ void FunctionDec::SemAnalyze(env::VEnvPtr venv, env::TEnvPtr tenv,
       tenv->Look(funDec->result_) : type::VoidTy::Instance();
     env::FunEntry *funEntry = new env::FunEntry(formalList, resultType);
     venv->Enter(funDec->name_, funEntry);
+    scopeFuncs.push_back(funDec->name_);
   }
   /* second round: scan function body */
   for (const FunDec* funDec : functions_->GetList()) {
@@ -382,12 +397,13 @@ void VarDec::SemAnalyze(env::VEnvPtr venv, env::TEnvPtr tenv, int labelcount,
     type::Ty *varType = tenv->Look(typ_);
     if (!varType) {
       errormsg->Error(pos_, "undefined type %s", typ_->Name().c_str());
+      return;
     }
     if (!initType->IsSameType(varType)) {
       errormsg->Error(pos_, "type mismatch");
-    } else {
-      venv->Enter(var_, new env::VarEntry(varType));
-    }
+    } 
+    venv->Enter(var_, new env::VarEntry(varType));
+    
   } else {
     if (typeid(*initType) == typeid(type::NilTy)) {
       errormsg->Error(pos_, "init should not be nil without type specified");
@@ -400,16 +416,18 @@ void VarDec::SemAnalyze(env::VEnvPtr venv, env::TEnvPtr tenv, int labelcount,
 void TypeDec::SemAnalyze(env::VEnvPtr venv, env::TEnvPtr tenv, int labelcount,
                          err::ErrorMsg *errormsg) const {
   /* TODO: Put your lab4 code here */
+  std::vector<sym::Symbol*> scopeTypes;
   /* first round: only scan declaration */
   for (const absyn::NameAndTy *nameAndTy : types_->GetList()) {
     sym::Symbol *nameSym = nameAndTy->name_;
-    if (tenv->Look(nameSym)) {
+    if (existSymbol(scopeTypes, nameSym)) {
       errormsg->Error(pos_, "two types have the same name");
     }
-    /* set nameTy to real Type later */
+    /* set nullptr to real Type later */
     tenv->Enter(nameSym, new type::NameTy(nameSym, nullptr));
+    scopeTypes.push_back(nameSym);
   }
-  /* second round: alloc temp node */
+  /* second round: alloc real type */
   for (const absyn::NameAndTy *nameAndTy : types_->GetList()) {
     type::NameTy *tyType = static_cast<type::NameTy*>(tenv->Look(nameAndTy->name_));
     tyType->ty_ = nameAndTy->ty_->SemAnalyze(tenv, errormsg);
