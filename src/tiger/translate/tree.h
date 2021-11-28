@@ -98,6 +98,7 @@ public:
 
   JumpStm(NameExp *exp, std::vector<temp::Label *> *jumps)
       : exp_(exp), jumps_(jumps) {}
+  static Stm *ToLabel(temp::Label *target);
   ~JumpStm() override;
 
   void Print(FILE *out, int d) const override;

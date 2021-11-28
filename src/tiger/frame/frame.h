@@ -69,14 +69,34 @@ protected:
 class Access {
 public:
   /* TODO: Put your lab5 code here */
-  
+  virtual tree::Exp *ToExp(tree::Exp *framePtr) const = 0;
   virtual ~Access() = default;
   
 };
 
 class Frame {
   /* TODO: Put your lab5 code here */
+public:
+
+  virtual ~Frame() {}
+
+  [[nodiscard]] virtual uint32_t Size() const = 0;
+
+  [[nodiscard]] virtual std::list<Access*> &Formals() = 0;
+
+  [[nodiscard]] virtual Access* AllocLocal(bool escape) = 0;
+
 };
+
+/* create a new X64Frame: hide the implement */
+Frame *NewFrame(temp::Label *name, std::list<bool> formals);
+
+/* call an external function */
+tree::Exp* ExternalCall(std::string_view name, tree::ExpList *args);
+
+tree::Stm *ProcEntryExit1(Frame *frame, tree::Stm *stm);
+
+static const int WORD_SIZE = 8;
 
 /**
  * Fragments

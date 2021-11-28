@@ -23,6 +23,10 @@ LabelStm::~LabelStm() = default;
 
 JumpStm::~JumpStm() { delete exp_; }
 
+Stm *JumpStm::ToLabel(temp::Label *target) {
+  return new JumpStm(new NameExp(target), new std::vector<temp::Label*>({target}));
+}
+
 CjumpStm::~CjumpStm() {
   delete left_;
   delete right_;
