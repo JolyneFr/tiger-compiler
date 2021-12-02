@@ -717,7 +717,6 @@ tr::Exp *TypeDec::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
   }
 
   /* waht should I return? */
-  printf("end translate typedec\n");
   return new tr::ExExp(new tree::ConstExp(114514));
 }
 
