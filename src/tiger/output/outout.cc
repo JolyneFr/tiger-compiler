@@ -48,12 +48,12 @@ void ProcFrag::OutputAssem(FILE *out, OutputPhase phase, bool need_ra) const {
     // Linearize to generate canonical trees
     TigerLog("-------====Linearlize=====-----\n");
     tree::StmList *stm_linearized = canon.Linearize();
-    TigerLog(stm_linearized);
+    // TigerLog(stm_linearized);
 
     // Group list into basic blocks
     TigerLog("------====Basic block_=====-------\n");
     canon::StmListList *stm_lists = canon.BasicBlocks();
-    TigerLog(stm_lists);
+    // TigerLog(stm_lists);
 
     // Order basic blocks into traces_
     TigerLog("-------====Trace=====-----\n");
@@ -75,22 +75,22 @@ void ProcFrag::OutputAssem(FILE *out, OutputPhase phase, bool need_ra) const {
 
   assem::InstrList *il = assem_instr.get()->GetInstrList();
 
-  // TigerLog("-------====Output assembly for %s=====-----\n",
-  //          frame_->name_->Name().data());
+  TigerLog("-------====Output assembly for %s=====-----\n",
+           frame_->Name()->Name().data());
 
-  // assem::Proc *proc = frame::ProcEntryExit3(frame_, il);
-  
-  // std::string proc_name = frame_->GetLabel();
+  assem::Proc *proc = frame::ProcEntryExit3(frame_, il);
 
-  // fprintf(out, ".globl %s\n", proc_name.data());
-  // fprintf(out, ".type %s, @function\n", proc_name.data());
-  // // prologue
-  // fprintf(out, "%s", proc->prolog_.data());
-  // // body
-  // proc->body_->Print(out, color);
-  // // epilog_
-  // fprintf(out, "%s", proc->epilog_.data());
-  // fprintf(out, ".size %s, .-%s\n", proc_name.data(), proc_name.data());
+  std::string proc_name = frame_->Name()->Name();
+
+  fprintf(out, ".globl %s\n", proc_name.data());
+  fprintf(out, ".type %s, @function\n", proc_name.data());
+  // prologue
+  fprintf(out, "%s", proc->prolog_.data());
+  // body
+  proc->body_->Print(out, color);
+  // epilog_
+  fprintf(out, "%s", proc->epilog_.data());
+  fprintf(out, ".size %s, .-%s\n", proc_name.data(), proc_name.data());
 }
 
 void StringFrag::OutputAssem(FILE *out, OutputPhase phase, bool need_ra) const {

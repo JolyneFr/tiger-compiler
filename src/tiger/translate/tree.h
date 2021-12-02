@@ -25,6 +25,8 @@ class RegManager;
 
 namespace tree {
 
+std::string fsPlaceHolder(std::string_view fs);
+
 class Stm;
 class Exp;
 class NameExp;

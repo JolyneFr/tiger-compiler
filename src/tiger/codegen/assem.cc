@@ -66,7 +66,7 @@ static std::string Format(std::string_view assem, temp::TempList *dst,
 
 void OperInstr::Print(FILE *out, temp::Map *m) const {
   std::string result = Format(assem_, dst_, src_, jumps_, m);
-  fprintf(out, "%s\n", result.data());
+  fprintf(out, "\t%s\n", result.data());
 }
 
 void LabelInstr::Print(FILE *out, temp::Map *m) const {
@@ -88,7 +88,7 @@ void MoveInstr::Print(FILE *out, temp::Map *m) const {
     }
   }
   std::string result = Format(assem_, dst_, src_, nullptr, m);
-  fprintf(out, "%s\n", result.data());
+  fprintf(out, "\t%s\n", result.data());
 }
 
 void InstrList::Print(FILE *out, temp::Map *m) const {
