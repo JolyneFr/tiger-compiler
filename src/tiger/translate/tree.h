@@ -25,6 +25,8 @@ class RegManager;
 
 namespace tree {
 
+std::string fsPlaceHolder(std::string_view fs);
+
 class Stm;
 class Exp;
 class NameExp;
@@ -108,6 +110,7 @@ public:
 
   JumpStm(NameExp *exp, std::vector<temp::Label *> *jumps)
       : exp_(exp), jumps_(jumps) {}
+  static Stm *ToLabel(temp::Label *target);
   ~JumpStm() override;
 
   void Print(FILE *out, int d) const override;

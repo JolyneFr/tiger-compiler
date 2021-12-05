@@ -40,7 +40,7 @@ private:
 class CodeGen {
 public:
   CodeGen(frame::Frame *frame, std::unique_ptr<canon::Traces> traces)
-      : frame_(frame), traces_(std::move(traces)) {}
+      : frame_(frame), traces_(std::move(traces)), fs_(frame->Name()->Name()) {}
 
   void Codegen();
   std::unique_ptr<AssemInstr> TransferAssemInstr() {
