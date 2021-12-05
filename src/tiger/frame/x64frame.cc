@@ -263,7 +263,7 @@ assem::Proc *ProcEntryExit3(frame::Frame *frame, assem::InstrList *body) {
   std::string funcName = frame->Name()->Name();
   std::string stackPtrName = *(reg_manager->temp_map_->Look(reg_manager->StackPointer()));
 
-  prologue << "\t.set " << tree::fsPlaceHolder(funcName) << ", " << frame->Size() << "\n";
+  prologue << "  .set " << tree::fsPlaceHolder(funcName) << ", " << frame->Size() << "\n";
   prologue << funcName << ":\n";
   prologue << "\tsubq $" << frame->Size() << ", " << stackPtrName << "\n";
 

@@ -82,15 +82,15 @@ void ProcFrag::OutputAssem(FILE *out, OutputPhase phase, bool need_ra) const {
 
   std::string proc_name = frame_->Name()->Name();
 
-  fprintf(out, ".globl %s\n", proc_name.data());
-  fprintf(out, ".type %s, @function\n", proc_name.data());
+  fprintf(out, "  .globl %s\n", proc_name.data());
+  fprintf(out, "  .type %s, @function\n", proc_name.data());
   // prologue
   fprintf(out, "%s", proc->prolog_.data());
   // body
   proc->body_->Print(out, color);
   // epilog_
   fprintf(out, "%s", proc->epilog_.data());
-  fprintf(out, ".size %s, .-%s\n", proc_name.data(), proc_name.data());
+  fprintf(out, "  .size %s, .-%s\n", proc_name.data(), proc_name.data());
 }
 
 void StringFrag::OutputAssem(FILE *out, OutputPhase phase, bool need_ra) const {
