@@ -32,6 +32,7 @@ public:
   }
   MoveList *Union(MoveList *list);
   MoveList *Intersect(MoveList *list);
+  bool Empty() { return move_list_.empty(); }
 
 private:
   std::list<std::pair<INodePtr, INodePtr>> move_list_;
@@ -66,6 +67,9 @@ private:
 
   void LiveMap();
   void InterfGraph();
+
+  /* get a node by its regPtr, create if necessary */
+  INodePtr AskNode(temp::Temp *reg);
 };
 
 } // namespace live

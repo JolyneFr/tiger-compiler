@@ -81,4 +81,40 @@ void Map::DumpMap(FILE *out) {
   }
 }
 
+bool TempList::IsEquivalent(TempList *other) const {
+  std::set<Temp*> selfSet(temp_list_.begin(), temp_list_.end());
+  std::set<Temp*> otherSet(other->temp_list_.begin(), other->temp_list_.end());
+  return selfSet == otherSet;
+}
+
+void TempList::CatList(TempList *other) {
+  if (!other || other->GetList().empty()) return;
+  temp_list_.insert(temp_list_.end(), 
+    other->temp_list_.begin(), other->temp_list_.end());
+}
+
+bool TempList::Contain(Temp *target) const {
+  for (auto temp : temp_list_ ) {
+    if (temp == target) return true;
+  }
+  return false;
+}
+
+TempList *TempList::Union(TempList *tl) {
+  auto res = new TempList();
+  res->CatList(this);
+  res->CatList(tl);
+  res->temp_list_.unique();
+  return res;
+}
+
+TempList *TempList::Diff(TempList *tl) {
+  auto res = new TempList();
+  for (auto temp : temp_list_) {
+    if (!tl->Contain(temp))
+      res->temp_list_.push_back(temp);
+  }
+  return res;
+}
+
 } // namespace temp

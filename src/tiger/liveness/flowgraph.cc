@@ -4,6 +4,30 @@ namespace fg {
 
 void FlowGraphFactory::AssemFlowGraph() {
   /* TODO: Put your lab6 code here */
+  FNodePtr prevNode = nullptr;
+  for (auto instr : instr_list_->GetList()) {
+    FNodePtr curNode = flowgraph_->NewNode(instr);
+    if (prevNode) {
+      flowgraph_->AddEdge(prevNode, curNode);
+    }
+    if (typeid(*instr) == typeid(assem::LabelInstr)) {
+      temp::Label *label = static_cast<assem::LabelInstr*>(instr)->label_;
+      label_map_->Enter(label, curNode);
+    }
+    if (instr->IsDirectJmp()) prevNode = nullptr;
+    else prevNode = curNode;
+  }
+  /* add jump edge to control flow */
+  for (auto fromNode : flowgraph_->Nodes()->GetList()) {
+    if (fromNode->NodeInfo()->IsJmp()) {
+      auto targetLabels = *(static_cast<assem::OperInstr*>(fromNode->NodeInfo())->jumps_->labels_);
+      for (auto label : targetLabels) {
+        FNodePtr toNode = label_map_->Look(label);
+        assert(toNode != nullptr);
+        flowgraph_->AddEdge(fromNode, toNode);
+      }
+    }
+  }
 }
 
 } // namespace fg
@@ -11,26 +35,26 @@ void FlowGraphFactory::AssemFlowGraph() {
 namespace assem {
 
 temp::TempList *LabelInstr::Def() const {
-  /* TODO: Put your lab6 code here */
+  return nullptr;
 }
 
 temp::TempList *MoveInstr::Def() const {
-  /* TODO: Put your lab6 code here */
+  return dst_ ? dst_ : new temp::TempList();
 }
 
 temp::TempList *OperInstr::Def() const {
-  /* TODO: Put your lab6 code here */
+  return dst_ ? dst_ : new temp::TempList();
 }
 
 temp::TempList *LabelInstr::Use() const {
-  /* TODO: Put your lab6 code here */
+  return nullptr;
 }
 
 temp::TempList *MoveInstr::Use() const {
-  /* TODO: Put your lab6 code here */
+  return src_ ? src_ : new temp::TempList();
 }
 
 temp::TempList *OperInstr::Use() const {
-  /* TODO: Put your lab6 code here */
+  return src_ ? src_ : new temp::TempList();
 }
 } // namespace assem

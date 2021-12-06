@@ -62,8 +62,16 @@ private:
 class TempList {
 public:
   explicit TempList(Temp *t) : temp_list_({t}) {}
+  /* for copy-construct */
+  explicit TempList(TempList *other) : temp_list_(other->temp_list_) {}
   TempList(std::initializer_list<Temp *> list) : temp_list_(list) {}
   TempList() = default;
+  /* for compare elements without order */
+  bool IsEquivalent(TempList *other) const ;
+  void CatList(TempList *other);
+  bool Contain(Temp *target) const ;
+  TempList *Union(TempList *tl);
+  TempList *Diff(TempList *tl);
   void Append(Temp *t) { temp_list_.push_back(t); }
   [[nodiscard]] Temp *NthTemp(int i) const;
   [[nodiscard]] const std::list<Temp *> &GetList() const { return temp_list_; }
