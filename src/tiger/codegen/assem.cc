@@ -97,4 +97,12 @@ void InstrList::Print(FILE *out, temp::Map *m) const {
   fprintf(out, "\n");
 }
 
+InstrList *InstrList::Compressed(temp::Map *m) {
+  instr_list_.remove_if([m] (Instr *i) {
+    return (i->IsMove() && 
+      m->Look(i->Def()->GetList().front()) == m->Look(i->Use()->GetList().front()));
+  });
+  return this;
+}
+
 } // namespace assem

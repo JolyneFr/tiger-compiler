@@ -8,6 +8,7 @@ void FlowGraphFactory::AssemFlowGraph() {
   for (auto instr : instr_list_->GetList()) {
     FNodePtr curNode = flowgraph_->NewNode(instr);
     if (prevNode) {
+      /* prev is not direct jump: have an edge */
       flowgraph_->AddEdge(prevNode, curNode);
     }
     if (typeid(*instr) == typeid(assem::LabelInstr)) {
@@ -35,7 +36,7 @@ void FlowGraphFactory::AssemFlowGraph() {
 namespace assem {
 
 temp::TempList *LabelInstr::Def() const {
-  return nullptr;
+  return new temp::TempList();
 }
 
 temp::TempList *MoveInstr::Def() const {
@@ -47,7 +48,7 @@ temp::TempList *OperInstr::Def() const {
 }
 
 temp::TempList *LabelInstr::Use() const {
-  return nullptr;
+  return new temp::TempList();
 }
 
 temp::TempList *MoveInstr::Use() const {

@@ -11,13 +11,22 @@
 
 #include <set>
 #include <stack>
+#include <map>
 
 namespace ra {
 
 using Node = graph::Node<temp::Temp>;
+using NodePtr = graph::Node<temp::Temp>*;
+using NodeList = graph::NodeList<temp::Temp>;
 using NodeListPtr = graph::NodeList<temp::Temp>*;
+using MoveList = live::MoveList;
 using MoveListPtr = live::MoveList*;
 using LiveGraph = live::LiveGraph;
+
+using NodeMoveMap = std::map<Node*, MoveList*>;
+using DegreeMap = std::map<NodePtr, int>;
+using AliasMap = std::map<NodePtr, NodePtr>;
+using ColorMap = std::map<NodePtr, temp::Temp*>;
 
 class Result {
 public:
@@ -31,7 +40,7 @@ public:
   Result(Result &&result) = delete;
   Result &operator=(const Result &result) = delete;
   Result &operator=(Result &&result) = delete;
-  ~Result();
+  ~Result() = default;
 };
 
 class RegAllocator {
@@ -52,25 +61,50 @@ private:
   void AssignColor();
   void RewriteProgram();
 
-  void AddEdge(Node *from, Node *to);
+  void AddEdge(Node *u, Node *v);
+  bool MoveRelated(Node *n);
+  MoveListPtr NodeMoves(Node *n);
+  bool PreColored(Node *n);
+  NodeListPtr Adjacent(Node *n);
+  void DecrementDegree(Node *n);
+  void EnableMoves(NodeList *nl);
+  void ClearAll();
+  NodePtr GetAlias(Node *n);
+  void AddWorkList(Node *n);
+  bool OK(Node *u, Node *v);
+  bool Conservative(NodeList *nl);
+  void Combine(Node *u, Node *v);
+  void FreezeMoves(Node *u);
 
-  /* data members */
+  /* Node set: except precolored & inital */
   NodeListPtr simplifyWorkList;
   NodeListPtr freezeWorkList;
   NodeListPtr spillWorkList;
-
   NodeListPtr spilledNodes;
   NodeListPtr coloredNodes;
   NodeListPtr coalescedNodes;
+  NodeListPtr selectStack;
 
   MoveListPtr workListMoves;
+  MoveListPtr activeMoves;
+  MoveListPtr frozenMoves;
+  MoveListPtr constrainedMoves;
+  MoveListPtr coalescedMoves;
+
+  NodeMoveMap moveList;
+  AliasMap alias;
+  DegreeMap degree;
+  ColorMap color;
 
   LiveGraph liveGraph;
+
 
   
   std::unique_ptr<Result> result_;
   frame::Frame *frame_;
   std::unique_ptr<cg::AssemInstr> assem_instr_;
+  int K;
+  
 
 
 };

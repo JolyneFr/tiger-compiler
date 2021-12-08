@@ -72,7 +72,12 @@ public:
   bool Contain(Temp *target) const ;
   TempList *Union(TempList *tl);
   TempList *Diff(TempList *tl);
+  void UnionWith(TempList *tl);
   void Append(Temp *t) { temp_list_.push_back(t); }
+  void Delete(Temp *t) { temp_list_.remove(t); }
+  bool Empty() const { return temp_list_.empty(); }
+  Temp *GetOne() const { return temp_list_.front(); }
+  void Replace(Temp *before, Temp *after);
   [[nodiscard]] Temp *NthTemp(int i) const;
   [[nodiscard]] const std::list<Temp *> &GetList() const { return temp_list_; }
 

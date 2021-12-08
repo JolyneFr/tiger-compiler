@@ -40,7 +40,7 @@ X64RegManager::X64RegManager() {
     rbx, rbp, r12, r13, r14, r15
   });
   returnSink_ = new temp::TempList({
-    rbx, rbp, r12, r13, r14, r15, rsp, rax
+    rsp, rax, rbx, rbp, r12, r13, r14, r15
   });
 
   regs_ = std::vector<temp::Temp*>(
@@ -159,8 +159,8 @@ X64Frame::X64Frame(temp::Label *name, std::list<bool> formals):
       assert(argIdx > regArgCount);
       srcExp = new tree::MemExp(new tree::BinopExp(
         tree::PLUS_OP, 
-        new tree::ConstExp((argIdx - regArgCount + 1) * frame::WORD_SIZE), 
-        new tree::TempExp(reg_manager->FramePointer())));
+        new tree::TempExp(reg_manager->FramePointer()),
+        new tree::ConstExp((argIdx - regArgCount) * frame::WORD_SIZE)));
     }
     /* move from src to dst */
     shift_of_view_.push_back(new tree::MoveStm(dstExp, srcExp));
@@ -248,6 +248,7 @@ tree::Stm *ProcEntryExit1(Frame *frame, tree::Stm *body) {
 
 /* for regalloc */
 assem::InstrList *ProcEntryExit2(assem::InstrList *body) {
+  /* return sink as src: must live-out */
   body->Append(new assem::OperInstr("", new temp::TempList(), 
     reg_manager->ReturnSink(), nullptr));
   
@@ -300,7 +301,7 @@ void X64Frame::InnerFuncArgCount(int argCount) {
 void X64Frame::AllocStackArg(RegManager *rm) {
   int rmArgRegCount = rm->ArgRegs()->GetList().size();
   if (max_inner_func_arg_cnt_ > rmArgRegCount) {
-    frame_size_ += (max_inner_func_arg_cnt_ - rmArgRegCount);
+    frame_size_ += (max_inner_func_arg_cnt_ - rmArgRegCount) * frame::WORD_SIZE;
   }
 }
 

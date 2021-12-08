@@ -21,6 +21,7 @@ public:
   virtual ~Instr() = default;
   virtual bool IsDirectJmp() const = 0;
   virtual bool IsJmp() const = 0;
+  virtual bool IsMove() const = 0;
 
   virtual void Print(FILE *out, temp::Map *m) const = 0;
   [[nodiscard]] virtual temp::TempList *Def() const = 0;
@@ -40,7 +41,8 @@ public:
   bool IsDirectJmp() const override { 
     return assem_.find("jmp") != std::string::npos; 
   }
-  bool IsJmp() const override { return jumps_ != nullptr; }
+  bool IsJmp() const override { return jumps_ != nullptr && jumps_->labels_->size(); }
+  bool IsMove() const override { return false; }
 
   void Print(FILE *out, temp::Map *m) const override;
   [[nodiscard]] temp::TempList *Def() const override;
@@ -57,6 +59,7 @@ public:
 
   bool IsDirectJmp() const override { return false; }
   bool IsJmp() const override { return false; }
+  bool IsMove() const override { return false; }
 
   void Print(FILE *out, temp::Map *m) const override;
   [[nodiscard]] temp::TempList *Def() const override;
@@ -73,7 +76,7 @@ public:
 
   bool IsDirectJmp() const override { return false; }
   bool IsJmp() const override { return false; }
-
+  bool IsMove() const override { return !assem_.compare("movq `s0, `d0"); }
 
   void Print(FILE *out, temp::Map *m) const override;
   [[nodiscard]] temp::TempList *Def() const override;
@@ -93,6 +96,7 @@ public:
   [[nodiscard]] const std::list<Instr *> &GetList() const {
     return instr_list_;
   }
+  InstrList *Compressed(temp::Map *m);
 
 private:
   std::list<Instr *> instr_list_;

@@ -89,7 +89,7 @@ void CjumpStm::Munch(assem::InstrList &instr_list, std::string_view fs) {
 
 void MoveStm::Munch(assem::InstrList &instr_list, std::string_view fs) {
   /* TODO: Put your lab5 code here */
-  /* these cases are insane */
+  /* these cases are insane, i need to handle fp here */
   if (typeid(*dst_) == typeid(tree::MemExp)) {
     tree::MemExp *memDst = static_cast<tree::MemExp*>(dst_);
 
@@ -108,6 +108,20 @@ void MoveStm::Munch(assem::InstrList &instr_list, std::string_view fs) {
       if (typeid(*binopExp->right_) == typeid(tree::ConstExp)) {
         /* MOVE(MEM(BINOP(PLUS, CONST(i), e1)), e2) */
         consti = static_cast<tree::ConstExp*>(binopExp->right_)->consti_;
+        if (typeid(*binopExp->left_) == typeid(tree::TempExp) && 
+          static_cast<tree::TempExp*>(binopExp->left_)->temp_ == reg_manager->FramePointer()) {
+          t2 = src_->Munch(instr_list, fs);
+          char store[77];
+          if (consti >= 0) {
+            sprintf(store, "movq `s0, (%s + %d)(`s1)", fsPlaceHolder(fs).c_str(), consti);
+          } else {
+            sprintf(store, "movq `s0, (%s - %d)(`s1)", fsPlaceHolder(fs).c_str(), -consti);
+          }
+          assem::Instr *frameStore = new assem::MoveInstr(
+            std::string(store), nullptr, new temp::TempList({t2, reg_manager->StackPointer()}));
+          instr_list.Append(frameStore); return;
+        }
+
         t1 = binopExp->left_->Munch(instr_list, fs);
         t2 = src_->Munch(instr_list, fs);
       } else 
@@ -159,15 +173,76 @@ void MoveStm::Munch(assem::InstrList &instr_list, std::string_view fs) {
       instr_list.Append(store);
     }
   } else {
-    /* dst must be temp, and can't be %rbp */
+    /* dst must be temp, and can't be fp */
     assert(typeid(*dst_) == typeid(tree::TempExp));
     assert(static_cast<tree::TempExp*>(dst_)->temp_ != reg_manager->FramePointer());
     temp::Temp *dstTemp = dst_->Munch(instr_list, fs);
-    temp::Temp *srcTemp = src_->Munch(instr_list, fs);
-    assem::Instr *move = new assem::MoveInstr(
-      "movq `s0, `d0",
-      new temp::TempList(dstTemp), new temp::TempList(srcTemp));
-    instr_list.Append(move);
+    /* handle fs */
+    if (typeid(*src_) == typeid(tree::MemExp)) {
+      auto memSrc = static_cast<tree::MemExp*>(src_);
+      if (typeid(*memSrc->exp_) == typeid(tree::BinopExp) &&
+          static_cast<tree::BinopExp*>(memSrc->exp_)->op_ == tree::PLUS_OP) {
+        auto binopExp = static_cast<tree::BinopExp*>(memSrc->exp_);
+        temp::Temp *srcTemp;  int consti;
+
+        if (typeid(*binopExp->left_) == typeid(tree::ConstExp)) {
+          consti = static_cast<tree::ConstExp*>(binopExp->left_)->consti_;
+          srcTemp = binopExp->right_->Munch(instr_list, fs);
+        } else 
+
+        if (typeid(*binopExp->right_) == typeid(tree::ConstExp)) {
+          consti = static_cast<tree::ConstExp*>(binopExp->right_)->consti_;
+          if (typeid(*binopExp->left_) == typeid(tree::TempExp) && 
+          static_cast<tree::TempExp*>(binopExp->left_)->temp_ == reg_manager->FramePointer()) {
+            char load[77];
+            if (consti >= 0) {
+              sprintf(load, "movq (%s + %d)(`s0), `d0", fsPlaceHolder(fs).c_str(), consti);
+            } else {
+              sprintf(load, "movq (%s - %d)(`s0), `d0", fsPlaceHolder(fs).c_str(), -consti);
+            }
+            assem::Instr *frameLoad = new assem::MoveInstr(
+              std::string(load), 
+              new temp::TempList(dstTemp), new temp::TempList(reg_manager->StackPointer()));
+            instr_list.Append(frameLoad); return;
+          }
+          srcTemp = binopExp->left_->Munch(instr_list, fs);
+        } else 
+        
+        /* fall through */ {
+          srcTemp = memSrc->exp_->Munch(instr_list, fs);
+          assem::Instr *move = new assem::MoveInstr(
+            "movq (`s0), `d0",
+            new temp::TempList(dstTemp), new temp::TempList(srcTemp));
+          instr_list.Append(move); return;
+        }
+
+        assem::Instr *binMemSrcMove = new assem::MoveInstr(
+          "movq " + std::to_string(consti) + "(`s0), `d0",
+          new temp::TempList(dstTemp), new temp::TempList(srcTemp));
+        instr_list.Append(binMemSrcMove);
+      } else 
+
+      /* all other conditions */ {
+      temp::Temp *srcTemp = memSrc->exp_->Munch(instr_list, fs);
+      assem::Instr *move = new assem::MoveInstr(
+        "movq (`s0), `d0",
+        new temp::TempList(dstTemp), new temp::TempList(srcTemp));
+      instr_list.Append(move);    
+      }
+    } else if (typeid(*src_) == typeid(tree::ConstExp)) {
+      int consti = static_cast<tree::ConstExp*>(src_)->consti_;
+      assem::Instr *moveImm = new assem::MoveInstr(
+        "movq $" + std::to_string(consti) + ", `d0",
+        new temp::TempList(dstTemp), nullptr);
+      instr_list.Append(moveImm);
+    } else {
+      /* fall through */
+      temp::Temp *srcTemp = src_->Munch(instr_list, fs);
+      assem::Instr *move = new assem::MoveInstr(
+        "movq `s0, `d0",
+        new temp::TempList(dstTemp), new temp::TempList(srcTemp));
+      instr_list.Append(move);    
+    }
   }
 
 }
@@ -342,7 +417,7 @@ temp::TempList *ExpList::MunchArgs(assem::InstrList &instr_list, std::string_vie
   auto argRegs = reg_manager->ArgRegs()->GetList();
   auto regItr = argRegs.begin();
   temp::TempList *usedRegs = new temp::TempList();
-  int offset = frame::WORD_SIZE;
+  int offset = 0;
   for (auto exp : exp_list_) {
     temp::Temp *expRes = exp->Munch(instr_list, fs);
     if (regItr != argRegs.end()) {

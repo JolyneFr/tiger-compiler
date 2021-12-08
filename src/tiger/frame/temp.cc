@@ -103,8 +103,9 @@ bool TempList::Contain(Temp *target) const {
 TempList *TempList::Union(TempList *tl) {
   auto res = new TempList();
   res->CatList(this);
-  res->CatList(tl);
-  res->temp_list_.unique();
+  for (auto t : tl->GetList()) {
+    if (!Contain(t)) res->Append(t);
+  }
   return res;
 }
 
@@ -115,6 +116,21 @@ TempList *TempList::Diff(TempList *tl) {
       res->temp_list_.push_back(temp);
   }
   return res;
+}
+
+void TempList::UnionWith(TempList *tl) {
+  for (auto t : tl->temp_list_) {
+    if (!Contain(t))
+      temp_list_.push_back(t);
+  }
+}
+
+void TempList::Replace(Temp *before, Temp *after) {
+  auto itr = temp_list_.begin();
+  while (itr != temp_list_.end()) {
+    if (*itr == before) *itr = after;
+    itr++;
+  }
 }
 
 } // namespace temp

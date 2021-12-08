@@ -105,11 +105,22 @@ public:
   void Clear() { node_list_.clear(); }
   void Prepend(Node<T> *n) { node_list_.push_front(n); }
   void Append(Node<T> *n) { node_list_.push_back(n); }
+  void UnionWith(NodeList<T> *nl);
+  void DiffBy(NodeList<T> *nl);
   bool Empty() { return node_list_.empty(); }
+  Node<T> *GetOne() { return node_list_.front(); }
 
   // Set operation on two lists
   NodeList<T> *Union(NodeList<T> *nl);
   NodeList<T> *Diff(NodeList<T> *nl);
+
+  // Stack operation for selectStack
+  void Push(Node<T> *n) { node_list_.push_back(n); }
+  Node<T> *Pop() { 
+    auto res = node_list_.back(); 
+    node_list_.pop_back();
+    return res;
+  }
 
   [[nodiscard]] const std::list<Node<T> *> &GetList() const {
     return node_list_;
@@ -197,14 +208,7 @@ template <typename T> bool NodeList<T>::Contain(Node<T> *n) {
 
 template <typename T> void NodeList<T>::DeleteNode(Node<T> *n) {
   assert(n);
-  auto it = node_list_.begin();
-  for (; it != node_list_.end(); it++) {
-    if (*it == n)
-      break;
-  }
-  if (it == node_list_.end())
-    return;
-  node_list_.erase(it);
+  node_list_.remove(n);
 }
 
 template <typename T> void NodeList<T>::CatList(NodeList<T> *nl) {
@@ -217,8 +221,9 @@ template <typename T> void NodeList<T>::CatList(NodeList<T> *nl) {
 template <typename T> NodeList<T> *NodeList<T>::Union(NodeList<T> *nl) {
   NodeList<T> *res = new NodeList<T>();
   res->CatList(this);
-  res->CatList(nl);
-  res->node_list_.unique();
+  for (auto n : nl->GetList()) {
+    if (!Contain(n)) res->Append(n);
+  }
   return res;
 }
 
@@ -229,6 +234,12 @@ template <typename T> NodeList<T> *NodeList<T>::Diff(NodeList<T> *nl) {
       res->node_list_.push_back(node);
   }
   return res;
+}
+
+template <typename T> void NodeList<T>::UnionWith(NodeList<T> *nl) {
+  for (auto n : nl->GetList()) {
+    if (!Contain(n)) Append(n);
+  }
 }
 
 // The type of "tables" mapping graph-nodes to information

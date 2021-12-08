@@ -32,7 +32,9 @@ public:
   }
   MoveList *Union(MoveList *list);
   MoveList *Intersect(MoveList *list);
-  bool Empty() { return move_list_.empty(); }
+  bool Empty() { return move_list_.empty(); } 
+  std::pair<INodePtr, INodePtr> &GetOne() { return move_list_.front(); }
+  void UnionWith(MoveList *list);
 
 private:
   std::list<std::pair<INodePtr, INodePtr>> move_list_;
@@ -56,6 +58,7 @@ public:
   void Liveness();
   LiveGraph GetLiveGraph() { return live_graph_; }
   tab::Table<temp::Temp, INode> *GetTempNodeMap() { return temp_node_map_; }
+  void PrintInAndOut(frame::RegManager *rm);
 
 private:
   fg::FGraphPtr flowgraph_;

@@ -15,7 +15,7 @@ struct Result {
   live::INodeListPtr spills;
 };
 
-class Color {
+class ColorAssigner {
   /* TODO: Put your lab6 code here */
 };
 } // namespace col
