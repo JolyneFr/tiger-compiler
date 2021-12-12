@@ -16,7 +16,7 @@ struct Result {
 };
 
 class ColorAssigner {
-  /* TODO: Put your lab6 code here */
+  /* Useless Class */
 };
 } // namespace col
 

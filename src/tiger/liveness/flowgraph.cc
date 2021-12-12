@@ -3,7 +3,7 @@
 namespace fg {
 
 void FlowGraphFactory::AssemFlowGraph() {
-  /* TODO: Put your lab6 code here */
+
   FNodePtr prevNode = nullptr;
   for (auto instr : instr_list_->GetList()) {
     FNodePtr curNode = flowgraph_->NewNode(instr);

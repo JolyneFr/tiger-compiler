@@ -39,7 +39,6 @@
   FUNCTION VAR TYPE
 
  /* token priority */
- /* TODO: Put your lab3 code here */
 %left OR
 %left AND
 %nonassoc EQ NEQ LT LE GT GE

@@ -4,7 +4,6 @@
 extern frame::RegManager *reg_manager;
 
 namespace frame {
-/* TODO: Put your lab5 code here */
 
 /* alloc x86_64 registers */
 temp::Temp *X64RegManager::rax = temp::TempFactory::NewTemp();
@@ -88,7 +87,7 @@ public:
   int offset;
 
   explicit InFrameAccess(int offset) : offset(offset) {}
-  /* TODO: Put your lab5 code here */
+
   tree::Exp *ToExp(tree::Exp *framePtr) const override {
     return new tree::MemExp(
       new tree::BinopExp( tree::PLUS_OP, 
@@ -104,14 +103,14 @@ public:
   temp::Temp *reg;
 
   explicit InRegAccess(temp::Temp *reg) : reg(reg) {}
-  /* TODO: Put your lab5 code here */
+
   tree::Exp *ToExp(tree::Exp *framePtr) const override {
     return new tree::TempExp(reg);
   }
 };
 
 class X64Frame : public Frame {
-  /* TODO: Put your lab5 code here */
+
 public:
   X64Frame(temp::Label *name, std::list<bool> formals);
   ~X64Frame() override;

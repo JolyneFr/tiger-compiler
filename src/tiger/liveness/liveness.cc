@@ -51,7 +51,6 @@ MoveList *MoveList::Intersect(MoveList *list) {
 }
 
 void LiveGraphFactory::LiveMap() {
-  /* TODO: Put your lab6 code here */
   /* intialize in & out set */
   for (auto node : flowgraph_->Nodes()->GetList()) {
     in_->Enter(node, new temp::TempList());
@@ -83,7 +82,6 @@ void LiveGraphFactory::LiveMap() {
 }
 
 void LiveGraphFactory::InterfGraph() {
-  /* TODO: Put your lab6 code here */
   
   auto interf_graph_ = live_graph_.interf_graph;
   auto move_list_ = live_graph_.moves;

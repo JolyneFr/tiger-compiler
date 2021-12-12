@@ -31,14 +31,12 @@ public:
   frame::Frame *frame_;
   Level *parent_;
 
-  /* TODO: Put your lab5 code here */
   Level(frame::Frame *f, Level *p): frame_(f), parent_(p) {}
   static Level* NewLevel(Level *parent, temp::Label *name, std::list<bool> formals);
 };
 
 class ProgTr {
 public:
-  // TODO: Put your lab5 code here */
   ProgTr(std::unique_ptr<absyn::AbsynTree> absyn_tree, std::unique_ptr<err::ErrorMsg> errormsg)
     : absyn_tree_(std::move(absyn_tree)), errormsg_(std::move(errormsg)) {
       main_level_ = std::make_unique<Level>(

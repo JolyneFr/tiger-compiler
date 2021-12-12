@@ -87,7 +87,7 @@ void RegAllocator::Build() {
 void RegAllocator::MakeWorkList() {
   for (auto node : liveGraph.interf_graph->Nodes()->GetList()) {
     if (PreColored(node)) continue;
-    if (node->Degree() >= K) 
+    if (node->OutDegree() >= K) 
       spillWorkList->Append(node);
     else if (MoveRelated(node))
       freezeWorkList->Append(node);

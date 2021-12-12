@@ -14,7 +14,6 @@ extern frame::RegManager *reg_manager;
 namespace tr {
 
 Access *Access::AllocLocal(Level *level, bool escape) {
-  /* TODO: Put your lab5 code here */
   return new Access(level, level->frame_->AllocLocal(escape));
 }
 
@@ -94,7 +93,6 @@ public:
       : cx_(trues, falses, stm) {}
   
   [[nodiscard]] tree::Exp *UnEx() const override {
-    /* TODO: Put your lab5 code here */
     temp::Temp *r = temp::TempFactory::NewTemp();
     temp::Label *t = temp::LabelFactory::NewLabel();
     temp::Label *f = temp::LabelFactory::NewLabel();
@@ -118,7 +116,6 @@ public:
 };
 
 void ProgTr::Translate() {
-  /* TODO: Put your lab5 code here */
   FillBaseTEnv();
   FillBaseVEnv();
   tr::ExpAndTy *ret = absyn_tree_->Translate(
@@ -137,14 +134,12 @@ tree::Exp *AccessToExp(tr::Access *access, frame::RegManager *rm) {
 tr::ExpAndTy *AbsynTree::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
                                    tr::Level *level, temp::Label *label,
                                    err::ErrorMsg *errormsg) const {
-  /* TODO: Put your lab5 code here */
   return root_->Translate(venv, tenv, level, label, errormsg);
 }
 
 tr::ExpAndTy *SimpleVar::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
                                    tr::Level *level, temp::Label *label,
                                    err::ErrorMsg *errormsg) const {
-  /* TODO: Put your lab5 code here */
   env::VarEntry *entry = static_cast<env::VarEntry*>(venv->Look(sym_));
   tree::Exp *framePtr = new tree::TempExp(reg_manager->FramePointer());
   tr::Level *curLevel = level, *targetLevel = entry->access_->level_;
@@ -164,7 +159,6 @@ tr::ExpAndTy *SimpleVar::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
 tr::ExpAndTy *FieldVar::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
                                   tr::Level *level, temp::Label *label,
                                   err::ErrorMsg *errormsg) const {
-  /* TODO: Put your lab5 code here */
   tr::ExpAndTy *varRes = var_->Translate(venv, tenv, level, label, errormsg);
   type::RecordTy *ty = static_cast<type::RecordTy*>(varRes->ty_->ActualTy());
   auto fieldItr = ty->fields_->GetList().cbegin();
@@ -185,7 +179,6 @@ tr::ExpAndTy *FieldVar::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
 tr::ExpAndTy *SubscriptVar::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
                                       tr::Level *level, temp::Label *label,
                                       err::ErrorMsg *errormsg) const {
-  /* TODO: Put your lab5 code here */
   tr::ExpAndTy *varRes = var_->Translate(venv, tenv, level, label, errormsg);
   tr::ExpAndTy *subRes = subscript_->Translate(venv, tenv, level, label, errormsg);
   type::ArrayTy *arrTy = static_cast<type::ArrayTy*>(varRes->ty_->ActualTy());
@@ -202,14 +195,12 @@ tr::ExpAndTy *SubscriptVar::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
 tr::ExpAndTy *VarExp::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
                                 tr::Level *level, temp::Label *label,
                                 err::ErrorMsg *errormsg) const {
-  /* TODO: Put your lab5 code here */
   return var_->Translate(venv, tenv, level, label, errormsg);
 }
 
 tr::ExpAndTy *NilExp::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
                                 tr::Level *level, temp::Label *label,
                                 err::ErrorMsg *errormsg) const {
-  /* TODO: Put your lab5 code here */
   return new tr::ExpAndTy(
     new tr::ExExp(new tree::ConstExp(0)), type::NilTy::Instance()
   );
@@ -218,7 +209,6 @@ tr::ExpAndTy *NilExp::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
 tr::ExpAndTy *IntExp::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
                                 tr::Level *level, temp::Label *label,
                                 err::ErrorMsg *errormsg) const {
-  /* TODO: Put your lab5 code here */
   return new tr::ExpAndTy(
     new tr::ExExp(new tree::ConstExp(val_)), type::IntTy::Instance()
   );
@@ -227,7 +217,6 @@ tr::ExpAndTy *IntExp::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
 tr::ExpAndTy *StringExp::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
                                    tr::Level *level, temp::Label *label,
                                    err::ErrorMsg *errormsg) const {
-  /* TODO: Put your lab5 code here */
   temp::Label *strLabel = temp::LabelFactory::NewLabel();
   frags->PushBack(new frame::StringFrag(strLabel, str_));
   return new tr::ExpAndTy(
@@ -238,7 +227,6 @@ tr::ExpAndTy *StringExp::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
 tr::ExpAndTy *CallExp::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
                                  tr::Level *level, temp::Label *label,
                                  err::ErrorMsg *errormsg) const {
-  /* TODO: Put your lab5 code here */
   env::FunEntry *funcEntry = static_cast<env::FunEntry*>(venv->Look(func_));
   /* translate arguments */
   tree::ExpList *argList = new tree::ExpList();
@@ -274,7 +262,6 @@ tr::ExpAndTy *CallExp::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
 tr::ExpAndTy *OpExp::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
                                tr::Level *level, temp::Label *label,
                                err::ErrorMsg *errormsg) const {
-  /* TODO: Put your lab5 code here */
   tr::ExpAndTy *leftExpAndTy = left_->Translate(venv, tenv, level, label, errormsg);
   tr::ExpAndTy *rightExpAndTy = right_->Translate(venv, tenv, level, label, errormsg);
   tree::BinOp treeOp;
@@ -331,7 +318,6 @@ tr::ExpAndTy *OpExp::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
 tr::ExpAndTy *RecordExp::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
                                    tr::Level *level, temp::Label *label,      
                                    err::ErrorMsg *errormsg) const {
-  /* TODO: Put your lab5 code here */
   type::RecordTy *recordTy = static_cast<type::RecordTy*>(tenv->Look(typ_));
   /* allocate heap space for record */
   int recordByteSize = frame::WORD_SIZE * fields_->GetList().size();
@@ -394,7 +380,6 @@ tr::ExpAndTy *RecordExp::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
 tr::ExpAndTy *SeqExp::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
                                 tr::Level *level, temp::Label *label,
                                 err::ErrorMsg *errormsg) const {
-  /* TODO: Put your lab5 code here */
   auto absynExpList = seq_->GetList();
 
   if (absynExpList.size() == 1) {
@@ -425,7 +410,6 @@ tr::ExpAndTy *SeqExp::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
 tr::ExpAndTy *AssignExp::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
                                    tr::Level *level, temp::Label *label,                       
                                    err::ErrorMsg *errormsg) const {
-  /* TODO: Put your lab5 code here */
   tree::Stm *assignStm = new tree::MoveStm(
     var_->Translate(venv, tenv, level, label, errormsg)->exp_->UnEx(),
     exp_->Translate(venv, tenv, level, label, errormsg)->exp_->UnEx());
@@ -435,7 +419,6 @@ tr::ExpAndTy *AssignExp::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
 tr::ExpAndTy *IfExp::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
                                tr::Level *level, temp::Label *label,
                                err::ErrorMsg *errormsg) const {
-  /* TODO: Put your lab5 code here */
   tr::ExpAndTy *testRes = test_->Translate(venv, tenv, level, label, errormsg);
   tr::ExpAndTy *thenRes = then_->Translate(venv, tenv, level, label, errormsg);
 
@@ -478,7 +461,6 @@ tr::ExpAndTy *IfExp::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
 tr::ExpAndTy *WhileExp::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
                                   tr::Level *level, temp::Label *label,            
                                   err::ErrorMsg *errormsg) const {
-  /* TODO: Put your lab5 code here */
   temp::Label *testLabel = temp::LabelFactory::NewLabel();
   temp::Label *bodyLabel = temp::LabelFactory::NewLabel();
   temp::Label *doneLabel = temp::LabelFactory::NewLabel();
@@ -502,7 +484,6 @@ tr::ExpAndTy *WhileExp::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
 tr::ExpAndTy *ForExp::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
                                 tr::Level *level, temp::Label *label,
                                 err::ErrorMsg *errormsg) const {
-  /* TODO: Put your lab5 code here */
   tr::ExpAndTy *lowRes = lo_->Translate(venv, tenv, level, label, errormsg);
   tr::ExpAndTy *highRes = hi_->Translate(venv, tenv, level, label, errormsg);
 
@@ -548,7 +529,6 @@ tr::ExpAndTy *ForExp::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
 tr::ExpAndTy *BreakExp::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
                                   tr::Level *level, temp::Label *label,
                                   err::ErrorMsg *errormsg) const {
-  /* TODO: Put your lab5 code here */
   return new tr::ExpAndTy(
     new tr::NxExp(tree::JumpStm::ToLabel(label)),
     type::VoidTy::Instance()
@@ -558,7 +538,6 @@ tr::ExpAndTy *BreakExp::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
 tr::ExpAndTy *LetExp::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
                                 tr::Level *level, temp::Label *label,
                                 err::ErrorMsg *errormsg) const {
-  /* TODO: Put your lab5 code here */
   tree::Exp* allExps = nullptr;
   tree::EseqExp* recurExp = nullptr;
   auto absynDecList = decs_->GetList();
@@ -602,7 +581,6 @@ tr::ExpAndTy *LetExp::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
 tr::ExpAndTy *ArrayExp::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
                                   tr::Level *level, temp::Label *label,                    
                                   err::ErrorMsg *errormsg) const {
-  /* TODO: Put your lab5 code here */
   tree::Exp *sizeExp = 
     size_->Translate(venv, tenv, level, label, errormsg)->exp_->UnEx();
   tr::ExpAndTy *initRes = init_->Translate(venv, tenv, level, label, errormsg);
@@ -625,14 +603,12 @@ tr::ExpAndTy *ArrayExp::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
 tr::ExpAndTy *VoidExp::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
                                  tr::Level *level, temp::Label *label,
                                  err::ErrorMsg *errormsg) const {
-  /* TODO: Put your lab5 code here */
   return new tr::ExpAndTy(nullptr, type::VoidTy::Instance());
 }
 
 tr::Exp *FunctionDec::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
                                 tr::Level *level, temp::Label *label,
                                 err::ErrorMsg *errormsg) const {
-  /* TODO: Put your lab5 code here */
   /* add function dec into venv, left body */
   for (auto funDec : functions_->GetList()) {
     temp::Label *funcName = temp::LabelFactory::NamedLabel(funDec->name_->Name());
@@ -685,7 +661,6 @@ tr::Exp *FunctionDec::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
 tr::Exp *VarDec::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
                            tr::Level *level, temp::Label *label,
                            err::ErrorMsg *errormsg) const {
-  /* TODO: Put your lab5 code here */
   /* initRes->ty_ may be NilTy */
   tr::ExpAndTy *initRes = init_->Translate(venv, tenv, level, label, errormsg);
   type::Ty *realTy = typ_ ? tenv->Look(typ_)->ActualTy() : initRes->ty_;
@@ -700,7 +675,6 @@ tr::Exp *VarDec::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
 tr::Exp *TypeDec::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
                             tr::Level *level, temp::Label *label,
                             err::ErrorMsg *errormsg) const {
-  /* TODO: Put your lab5 code here */
   /* enter all type names first */
   for (auto dec : types_->GetList()) {
     tenv->Enter(dec->name_, new type::NameTy(dec->name_, nullptr));
@@ -721,18 +695,15 @@ tr::Exp *TypeDec::Translate(env::VEnvPtr venv, env::TEnvPtr tenv,
 }
 
 type::Ty *NameTy::Translate(env::TEnvPtr tenv, err::ErrorMsg *errormsg) const {
-  /* TODO: Put your lab5 code here */
   return new type::NameTy(name_, tenv->Look(name_));
 }
 
 type::Ty *RecordTy::Translate(env::TEnvPtr tenv,
                               err::ErrorMsg *errormsg) const {
-  /* TODO: Put your lab5 code here */
   return new type::RecordTy(record_->MakeFieldList(tenv, errormsg));
 }
 
 type::Ty *ArrayTy::Translate(env::TEnvPtr tenv, err::ErrorMsg *errormsg) const {
-  /* TODO: Put your lab5 code here */
   return new type::ArrayTy(tenv->Look(array_));
 }
 

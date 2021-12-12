@@ -70,15 +70,15 @@ protected:
 };
 
 class Access {
+
 public:
-  /* TODO: Put your lab5 code here */
   virtual tree::Exp *ToExp(tree::Exp *framePtr) const = 0;
   virtual ~Access() = default;
   
 };
 
 class Frame {
-  /* TODO: Put your lab5 code here */
+
 public:
 
   virtual ~Frame() {}
@@ -185,7 +185,6 @@ private:
   std::list<Frag*> frags_;
 };
 
-/* TODO: Put your lab5 code here */
 
 } // namespace frame
 
