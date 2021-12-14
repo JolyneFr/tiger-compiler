@@ -193,7 +193,7 @@ tree::Stm *ProcEntryExit1(Frame *frame, tree::Stm *body) {
   tree::SeqStm *saveRoot = nullptr;
   tree::SeqStm *saveRecurStm = nullptr;
   for (auto calleeSave : reg_manager->CalleeSaves()->GetList()) {
-    frame::Access *reg = frame->AllocLocal(true);
+    frame::Access *reg = frame->AllocLocal(false);
     savedRegAccess.push_back(reg);
     tree::Exp *dstExp, *srcExp;
 

@@ -184,7 +184,7 @@ template <typename T> int Node<T>::Degree() { return InDegree() + OutDegree(); }
 template <typename T> NodeList<T> *Node<T>::Adj() {
   NodeList<T> *adj_list = new NodeList<T>();
   adj_list->CatList(succs_);
-  adj_list->CatList(preds_);
+  adj_list->UnionWith(preds_);
   return adj_list;
 }
 

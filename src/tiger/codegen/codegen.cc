@@ -271,7 +271,7 @@ temp::Temp *BinopExp::Munch(assem::InstrList &instr_list, std::string_view fs) {
     assem::Instr *imul = new assem::OperInstr(
       "imulq `s0",
       new temp::TempList({frame::X64RegManager::rax, frame::X64RegManager::rdx}), 
-      new temp::TempList(rt), nullptr);
+      new temp::TempList({rt, frame::X64RegManager::rax}), nullptr);
     assem::Instr *move2 = new assem::MoveInstr(
       "movq `s0, `d0",
       new temp::TempList(res), new temp::TempList(frame::X64RegManager::rax));
