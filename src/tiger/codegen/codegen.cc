@@ -413,8 +413,8 @@ temp::TempList *ExpList::MunchArgs(assem::InstrList &instr_list, std::string_vie
       regItr++; 
     } else {
       assem::Instr *moveToFrame = new assem::MoveInstr(
-        "movq `s0, " + std::to_string(offset) + "(`d0)",
-        new temp::TempList(reg_manager->StackPointer()), new temp::TempList(expRes));
+        "movq `s0, " + std::to_string(offset) + "(`s1)",
+        nullptr, new temp::TempList({expRes, reg_manager->StackPointer()}));
       instr_list.Append(moveToFrame);
       offset += frame::WORD_SIZE;
     }
